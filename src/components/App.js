@@ -1,35 +1,41 @@
-import React, { Component } from 'react';
+import React, {useState } from 'react';
 import Searchbar from 'components/Searchbar';
 import ImageGallery from 'components/ImageGallery';
 import Modal from 'components/Modal';
 import { AppStyled } from './App.styled.jsx';
 
-export default class App extends Component {
-  state = {
-    modalNow: null,
-    currentSearch: '',
+function App () {
+  const [modalNow, setModalNow] = useState(null);
+  const [currentSearch, setCurrentSearch] = useState('');
+  const [page, setPage] = useState(1);
+ 
+
+const onSubmit = search => {
+  setCurrentSearch(search);
+  setPage(1);
   };
 
-  onSubmit = search => {
-    this.setState({ currentSearch: search });
+  const onModal = url => {
+    setModalNow(url);
   };
 
-  onModal = url => {
-    this.setState({ modalNow: url });
+  const setNextPage = nextPage => {
+  setPage(page => page + nextPage);
   };
-
-  render() {
-    const { modalNow } = this.state;
-
+ 
     return (
       <AppStyled>
-        <Searchbar onSubmit={this.onSubmit} />
+        <Searchbar onSubmit={onSubmit} />
         <ImageGallery
-          search={this.state.currentSearch}
-          onClickToModal={this.onModal}
+          search={currentSearch}
+          onClickToModal={onModal}
+          page={page}
+          setPage={setNextPage}
         />
-        {modalNow && <Modal largeImg={modalNow} closeModal={this.onModal} />}
+        {modalNow && <Modal largeImg={modalNow} closeModal={onModal} />}
       </AppStyled>
     );
   }
-}
+
+
+export default App;

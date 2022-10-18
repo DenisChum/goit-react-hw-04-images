@@ -1,31 +1,27 @@
-import React, { Component } from 'react';
+import React, { useState } from 'react';
 import { SearchbarStyled } from './Searchbar.styled';
 import { AiOutlineSearch } from 'react-icons/ai';
 import propTypes from 'prop-types';
-export default class Searchbar extends Component {
-  state = {
-    search: '',
+
+
+export default function Searchbar ({onSubmit}) {
+  const [search, setSearch] = useState('')
+
+  const handleInputSearch = ({ target }) => {
+    setSearch(target.value);
   };
 
-  handleInputSearch = ({ target }) => {
-    return this.setState({ [target.name]: target.value });
-  };
-
-  submitForm = event => {
+  const submitForm = event => {
     event.preventDefault();
-    const { search } = this.state;
-
     if (search.trim() === '') return alert('You do not write anything :(');
-
-    this.props.onSubmit(search);
-    this.setState({ search: '' });
+      onSubmit(search);
+    setSearch('');
   };
 
-  render() {
-    const { search } = this.state;
+
     return (
       <SearchbarStyled>
-        <form onSubmit={this.submitForm}>
+        <form onSubmit={submitForm}>
           <button type="submit">
             <AiOutlineSearch stroke="black" size={25} />
           </button>
@@ -36,14 +32,14 @@ export default class Searchbar extends Component {
             placeholder="Search images and photos"
             name="search"
             value={search}
-            onChange={this.handleInputSearch}
+            onChange={handleInputSearch}
           />
         </form>
       </SearchbarStyled>
     );
   }
-}
 
 Searchbar.propTypes = {
   onSubmit: propTypes.func.isRequired,
 };
+

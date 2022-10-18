@@ -19,4 +19,3 @@ ImageGalleryItem.propTypes = {
   tags: propTypes.string.isRequired,
   onClickToModal: propTypes.func.isRequired,
 };
-

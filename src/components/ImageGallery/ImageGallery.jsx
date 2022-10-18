@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 import api from '../../service/pixabayApi';
 import ImageGalleryItem from 'components/ImageGalleryItem';
 import Button from 'components/Button';
@@ -6,97 +6,78 @@ import { List } from './ImageGallery.styled';
 import propTypes from 'prop-types';
 import Spinner from 'components/Spinner';
 
-export default class ImageGallery extends Component {
-  static propTypes = {
-    search: propTypes.string.isRequired,
-    onClickToModal: propTypes.func.isRequired,
-  };
+export default function ImageGallery({
+  search,
+  onClickToModal,
+  page,
+  setPage,
+}) {
+  const [status, setStatus] = useState('idle');
+  const [error, setError] = useState(null);
+  const [images, setImages] = useState([]);
 
-  state = {
-    status: 'idle',
-    error: null,
-    images: [],
-    page: 1,
-  };
+  useEffect(() => {
+    if (!search) return;
 
-  componentDidUpdate(prevProps, prevState) {
-    const prevSearch = prevProps.search;
-    const nextSearch = this.props.search;
-    const prevPage = prevState.page;
-    const nextPage = this.state.page;
-
-    if (prevSearch !== nextSearch) {
-      this.setState({ page: 1, images: [] });
+    if (page === 1) {
+      setImages([]);
+      setStatus('idle');
+      setError(null);
     }
 
-    if (
-      (prevSearch !== nextSearch && nextPage === 1) ||
-      prevPage !== nextPage
-    ) {
-      this.setState({
-        status: 'pending',
+    setStatus('pending');
+    api(search, page)
+      .then(resp => {
+        setImages(images => [...images, ...resp.hits]);
+        setStatus('resolved');
+        scrollToBottom();
+      })
+      .catch(error => {
+        setError(error.message);
+        setStatus('rejected');
+        setImages([]);
       });
-      api(nextSearch, this.state.page)
-        .then(resp => {
-          this.setState(state => {
-            return {
-              images: [...state.images, ...resp.hits],
-              status: 'resolved',
-            };
-          });
-          this.scrollToBottom();
-        })
-        .catch(error => {
-          this.setState({
-            error: error.message,
-            status: 'rejected',
-            page: 1,
-            images: [],
-          });
-        });
-    }
-  }
+  }, [search, page]);
 
-  onClickButton = () => {
-    this.setState(state => ({
-      page: state.page + 1,
-    }));
+  const onClickButton = () => {
+    setPage(1);
   };
 
-  scrollToBottom = () => {
+  const scrollToBottom = () => {
     window.scrollTo({
       top: document.body.clientHeight,
       behavior: 'smooth',
     });
   };
 
-  render() {
-    const { status, error, images } = this.state;
-
-    if (status === 'rejected') {
-      return <h1>{error}</h1>;
-    }
-
-    return (
-      <>
-        {images.length !== 0 && (
-          <List>
-            {images.map(({ id, webformatURL, tags, largeImageURL }) => {
-              return (
-                <ImageGalleryItem
-                  key={id}
-                  url={webformatURL}
-                  tags={tags}
-                  onClickToModal={this.props.onClickToModal}
-                  largeImageURL={largeImageURL}
-                />
-              );
-            })}
-          </List>
-        )}
-        {status === 'pending' && <Spinner />}
-        {status === 'resolved' && <Button onClickButton={this.onClickButton} />}
-      </>
-    );
+  if (status === 'rejected') {
+    return <h1>{error}</h1>;
   }
+
+  return (
+    <>
+      {images.length !== 0 && (
+        <List>
+          {images.map(({ id, webformatURL, tags, largeImageURL }) => {
+            return (
+              <ImageGalleryItem
+                key={id}
+                url={webformatURL}
+                tags={tags}
+                onClickToModal={onClickToModal}
+                largeImageURL={largeImageURL}
+              />
+            );
+          })}
+        </List>
+      )}
+      {status === 'pending' && <Spinner />}
+      {status === 'resolved' && <Button onClickButton={onClickButton} />}
+    </>
+  );
 }
+
+ImageGallery.propTypes = {
+  search: propTypes.string.isRequired,
+  onClickToModal: propTypes.func.isRequired,
+};
