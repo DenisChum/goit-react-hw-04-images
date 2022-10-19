@@ -5,15 +5,11 @@ import propTypes from 'prop-types';
 
 
 export default function Searchbar ({onSubmit}) {
-  const [search, setSearch] = useState('')
-
-  const handleInputSearch = ({ target }) => {
-    setSearch(target.value);
-  };
+  const [search, setSearch] = useState('');
 
   const submitForm = event => {
     event.preventDefault();
-    if (search.trim() === '') return alert('You do not write anything :(');
+    if (search.trim() === '') return alert('You do not write anything');
       onSubmit(search);
     setSearch('');
   };
@@ -32,7 +28,8 @@ export default function Searchbar ({onSubmit}) {
             placeholder="Search images and photos"
             name="search"
             value={search}
-            onChange={handleInputSearch}
+            onChange={({ target }) => 
+    setSearch(target.value)}
           />
         </form>
       </SearchbarStyled>

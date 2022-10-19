@@ -4,7 +4,7 @@ import ImageGallery from 'components/ImageGallery';
 import Modal from 'components/Modal';
 import { AppStyled } from './App.styled.jsx';
 
-function App () {
+export default function App () {
   const [modalNow, setModalNow] = useState(null);
   const [currentSearch, setCurrentSearch] = useState('');
   const [page, setPage] = useState(1);
@@ -38,4 +38,3 @@ const onSubmit = search => {
   }
 
 
-export default App;
